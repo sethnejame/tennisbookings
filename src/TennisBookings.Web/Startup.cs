@@ -73,6 +73,7 @@ namespace TennisBookings.Web
                 .AddAuditing()
                 .AddContentServices();
 
+            services.AddSingleton<FileProcessingChannel>();
             services.AddTennisPlayerApiClient(options => options.BaseAddress = Configuration.GetSection("ExternalServices:TennisPlayersApi")["Url"]);
             services.AddStatisticsApiClient(options => options.BaseAddress = Configuration.GetSection("ExternalServices:StatisticsApi")["Url"]);
             services.AddResultProcessing();
