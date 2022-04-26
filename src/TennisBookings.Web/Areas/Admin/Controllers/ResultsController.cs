@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -86,10 +87,29 @@ namespace TennisBookings.Web.Areas.Admin.Controllers
                 {
                     await file.CopyToAsync(stream, cancellationToken);
                 }
+
+                var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                cts.CancelAfter(TimeSpan.FromSeconds(3)); // wait max 3 seconds
+
+                try
+                {
+                    var fileWritten = await _channel.AddFileAsync(fileName, cts.Token);
+
+                    if (fileWritten)
+                    {
+                        sw.Stop();
+
+                        _logger.LogInformation($"Time for result upload was {sw.ElapsedMilliseconds}ms.");
+
+                        return RedirectToAction("UploadComplete");
+                    }
+                }
+                catch (OperationCanceledException) when (cts.IsCancellationRequested)
+                {
+                    System.IO.File.Delete(fileName);  // Delete the temp file to cleanup
+                }
             }
 
-            var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            cts.CancelAfter(TimeSpan.FromSeconds(3));
 
             return RedirectToAction("UploadFailed");
         }
