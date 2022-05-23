@@ -81,6 +81,8 @@ namespace TennisBookings.Web
             if (Configuration.IsWeatherForecastEnabled())
                 services.AddHostedService<WeatherCacheService>();
 
+            services.AddHostedService<FileProcessingService>();
+
             services.AddControllersWithViews();
             services.AddRazorPages(options =>
             {
